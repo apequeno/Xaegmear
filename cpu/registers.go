@@ -1,78 +1,73 @@
 package cpu
 
-type FlagsRegister struct {
-	zero bool
-	subtract bool
-	half_carry bool
-	carry bool
-}
-type Registers struct {
-	a byte
-	b byte
-	c byte
-	d byte
-	e byte
-	f *FlagsRegister // Potentially breaks it
-	h byte
-	l byte
+type ByteReg struct {
+	val uint8
 }
 
-const (
-	zero_offset byte = 7
-	subtract_offset byte = 6
-	halfCarry_offset byte = 5
-	carry_offset byte = 4
-)
-
-func (reg *Registers) get_af() uint16 {
-	return (uint16(reg.a) << 8) | (uint16(reg.f))
-
-}
-func (reg *Registers) set_af(val uint16) {
-	reg.a = byte((val & 0xFF00) >> 8) 
-	reg.f = byte(val & 0xFF)
+type TwoByteReg struct {
+	high ByteReg
+	low  ByteReg
 }
 
-
-func (reg *Registers) get_bc() uint16 {
-	return (uint16(reg.b) << 8) | (uint16(reg.c))
-
-}
-func (reg *Registers) set_bc(val uint16) {
-	reg.b = byte((val & 0xFF00) >> 8) 
-	reg.c = byte(val & 0xFF)
+func (reg *ByteReg) SetVal(val uint8) {
+	reg.val = val
 }
 
-
-func (reg *Registers) get_de() uint16 {
-	return (uint16(reg.d) << 8) | (uint16(reg.e))
-
-}
-func (reg *Registers) set_de(val uint16) {
-	reg.d = byte((val & 0xFF00) >> 8) 
-	reg.e = byte(val & 0xFF)
+func (reg *ByteReg) GetVal() uint8 {
+	return reg.val
 }
 
-
-func (reg *Registers) get_hl() uint16 {
-	return (uint16(reg.h) << 8) | (uint16(reg.l))
-
-}
-func (reg *Registers) set_hl(val uint16) {
-	reg.h = byte((val & 0xFF00) >> 8) 
-	reg.l = byte(val & 0xFF)
+func (reg *ByteReg) Increment() {
+	reg.val++
 }
 
-func (flags *FlagsRegister) convert() byte {
-	return (if flags.zero {1} else {0} << zero_offset |
-			if flags.subtract {1} else {0} << subtract_offset |
-			if flags.half_carry {1} else {0} << halfCarry_offset |
-			if flags.carry {1} else {0} << carry_offset)
+func (reg *Bytereg) Decrement() {
+	reg.val--
 }
 
-func (flags *FlagsRegister) convert(val byte) {
-	flags.zero = ((val >> zero_offset) & 0b1) != 0
-	flags.subtract = ((val >> subtract_offset) & 0b1) != 0
-	flags.halfCarry = ((val >> halfCarry_offset) & 0b1) != 0
-	flags.carry = ((val >> carry_offset) & 0b1) != 0
+func (reg *TwoByteReg) SetHigh(value uint8) {
+	reg.high.val = value
+}
+
+func (reg *TwoByteReg) GetHigh() uint8 {
+	return reg.high.val
+}
+
+func (reg *TwoByteReg) GetHighReg() *ByteReg {
+	return &reg.high
+}
+
+func (reg *TwoByteReg) SetLow(value uint8) {
+	reg.low.val = value
+}
+
+func (reg *TwoByteReg) GetLow() uint8 {
+	return reg.low.val
+}
+
+func (reg *TwoByteReg) GetLowReg() *ByteReg {
+	return &reg.low
+}
+
+func (reg *TwoByteReg) SetVal(val uint16) {
+	reg.low.SetValue(uint8(value & 0xFF))
+	reg.high.SetValue(uint8((value >> 8) & 0xFF))
+}
+
+func (reg *TwoByteReg) GetVal() uint16 {
+	high := uint16(reg.high.GetVal())
+	low := uint16(reg.low.GetVal())
+	return (high << 8) | low
+}
+
+func (reg *TwoByteReg) Increment() {
+	value := reg.GetVal()
+	value++
+	reg.SetValue(value)
+}
+
+func (reg *TwoByteReg) Decrement() {
+	value := reg.GetVal()
+	value--
+	reg.SetValue(value)
 }
