@@ -64,7 +64,7 @@ func (reg *Registers) set_hl(val uint16) {
 }
 
 func (flags *FlagsRegister) convert() byte {
-	return ([if flags.zero {1} else {0}] << zero_offset |
+	return (if flags.zero {1} else {0} << zero_offset |
 			if flags.subtract {1} else {0} << subtract_offset |
 			if flags.half_carry {1} else {0} << halfCarry_offset |
 			if flags.carry {1} else {0} << carry_offset)
